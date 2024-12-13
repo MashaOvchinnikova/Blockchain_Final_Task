@@ -50,7 +50,6 @@ contract YourContract {
     
     function buyArtwork(uint256 _id) public payable {
         Artwork storage artwork = artworks[_id];
-        require(artwork.forSale == true, "Artwork is not for sale");
         require(!artwork.sold, "Artwork already sold");
         require(artwork.owner != msg.sender, "You can't buy your own artwork");
         require(msg.value >= artwork.price, "You don't have enough Ether to purchase this artwork");
@@ -59,17 +58,11 @@ contract YourContract {
         seller.transfer(msg.value);
         
         artwork.owner = msg.sender;
-        artwork.forSale = false;
         artwork.sold = true;
         
         emit ArtworkSold(_id, msg.sender);
     }
     
-    function setArtworkForSale(uint256 _id, bool _forSale) public {
-        Artwork storage artwork = artworks[_id];
-        require(msg.sender == artwork.owner, "Only owner can set artwork for sale");
-        artwork.forSale = _forSale;
-    }
 
     function getArtwork(uint _id) public view returns (Artwork memory) {
         return artworks[_id];
