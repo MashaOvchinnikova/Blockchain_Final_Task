@@ -8,58 +8,79 @@ import "hardhat/console.sol";
 // import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
- * A smart contract that allows changing a state variable of the contract and tracking the changes
- * It also allows the owner to withdraw the Ether in the contract
- * @author BuidlGuidl
+ * Смарт контракт платформы для продажи цифровых произведений искусства
  */
 contract YourContract {
-    // State Variables
-    address public immutable owner;
-    string public greeting = "Building Unstoppable Apps!!!";
-    bool public premium = false;
-    uint256 public totalCounter = 0;
-    mapping(address => uint) public userGreetingCounter;
+    address public contractOwner;
+    string public greeting = "Welcome to the digital art sales platform!!!";
 
-    // Events: a way to emit log statements from smart contract that can be listened to by external parties
-    event GreetingChange(address indexed greetingSetter, string newGreeting, bool premium, uint256 value);
-
-    // Constructor: Called once on contract deployment
-    // Check packages/hardhat/deploy/00_deploy_your_contract.ts
-    constructor(address _owner) {
-        owner = _owner;
+    struct Artwork {
+        string title;
+        string description;
+        string author;
+        uint256 price;
+        address owner;
+        bool forSale;
+        bool sold;
     }
-
-    // Modifier: used to define a set of rules that must be met before or after a function is executed
-    // Check the withdraw() function
+    
+    mapping(uint256 => Artwork) public artworks;
+    uint public artworkCount;
+    
+    event ArtworkUploaded(string title, string description, string author, uint256 price, address owner);
+    event ArtworkSold(uint256 id, address buyer);
+    
     modifier isOwner() {
         // msg.sender: predefined variable that represents address of the account that called the current function
-        require(msg.sender == owner, "Not the Owner");
+        require(msg.sender == contractOwner, "Not the Owner");
         _;
     }
 
-    /**
-     * Function that allows anyone to change the state variable "greeting" of the contract and increase the counters
-     *
-     * @param _newGreeting (string memory) - new greeting to save on the contract
-     */
-    function setGreeting(string memory _newGreeting) public payable {
-        // Print data to the hardhat chain console. Remove when deploying to a live network.
-        console.log("Setting new greeting '%s' from %s", _newGreeting, msg.sender);
+    constructor(address _owner) {
+        contractOwner = _owner;
+        artworkCount = 0;
+    }
+    
+    function uploadArtwork(string memory title, string memory description, 
+        string memory author, uint256 price) public {
+        artworkCount++;
+        artworks[artworkCount] = Artwork(title, description, author, price, msg.sender, true, false);
+        emit ArtworkUploaded(title, description, author, price, msg.sender);
+    }
+    
+    function buyArtwork(uint256 _id) public payable {
+        Artwork storage artwork = artworks[_id];
+        require(artwork.forSale == true, "Artwork is not for sale");
+        require(!artwork.sold, "Artwork already sold");
+        require(artwork.owner != msg.sender, "You can't buy your own artwork");
+        require(msg.value >= artwork.price, "You don't have enough Ether to purchase this artwork");
+        
+        address payable seller = payable(artwork.owner);
+        seller.transfer(msg.value);
+        
+        artwork.owner = msg.sender;
+        artwork.forSale = false;
+        artwork.sold = true;
+        
+        emit ArtworkSold(_id, msg.sender);
+    }
+    
+    function setArtworkForSale(uint256 _id, bool _forSale) public {
+        Artwork storage artwork = artworks[_id];
+        require(msg.sender == artwork.owner, "Only owner can set artwork for sale");
+        artwork.forSale = _forSale;
+    }
 
-        // Change state variables
-        greeting = _newGreeting;
-        totalCounter += 1;
-        userGreetingCounter[msg.sender] += 1;
+    function getArtwork(uint _id) public view returns (Artwork memory) {
+        return artworks[_id];
+    }
 
-        // msg.value: built-in global variable that represents the amount of ether sent with the transaction
-        if (msg.value > 0) {
-            premium = true;
-        } else {
-            premium = false;
+    function getAllArtworks() public view returns (Artwork[] memory) {
+        Artwork[] memory artworkList = new Artwork[](artworkCount);
+        for (uint i = 1; i <= artworkCount; i++) {
+            artworkList[i - 1] = artworks[i];
         }
-
-        // emit: keyword used to trigger an event
-        emit GreetingChange(msg.sender, _newGreeting, msg.value > 0, msg.value);
+        return artworkList;
     }
 
     /**
@@ -67,7 +88,7 @@ contract YourContract {
      * The function can only be called by the owner of the contract as defined by the isOwner modifier
      */
     function withdraw() public isOwner {
-        (bool success, ) = owner.call{ value: address(this).balance }("");
+        (bool success, ) = contractOwner.call{ value: address(this).balance }("");
         require(success, "Failed to send Ether");
     }
 

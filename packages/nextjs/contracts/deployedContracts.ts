@@ -4,6 +4,346 @@
  */
 import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
-const deployedContracts = {} as const;
+const deployedContracts = {
+  31337: {
+    YourContract: {
+      address: "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+      abi: [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_owner",
+              type: "address",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "id",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "buyer",
+              type: "address",
+            },
+          ],
+          name: "ArtworkSold",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "string",
+              name: "title",
+              type: "string",
+            },
+            {
+              indexed: false,
+              internalType: "string",
+              name: "description",
+              type: "string",
+            },
+            {
+              indexed: false,
+              internalType: "string",
+              name: "author",
+              type: "string",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "price",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+          ],
+          name: "ArtworkUploaded",
+          type: "event",
+        },
+        {
+          inputs: [],
+          name: "artworkCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "artworks",
+          outputs: [
+            {
+              internalType: "string",
+              name: "title",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "description",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "author",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "price",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+            {
+              internalType: "bool",
+              name: "forSale",
+              type: "bool",
+            },
+            {
+              internalType: "bool",
+              name: "sold",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_id",
+              type: "uint256",
+            },
+          ],
+          name: "buyArtwork",
+          outputs: [],
+          stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "contractOwner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getAllArtworks",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "string",
+                  name: "title",
+                  type: "string",
+                },
+                {
+                  internalType: "string",
+                  name: "description",
+                  type: "string",
+                },
+                {
+                  internalType: "string",
+                  name: "author",
+                  type: "string",
+                },
+                {
+                  internalType: "uint256",
+                  name: "price",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "owner",
+                  type: "address",
+                },
+                {
+                  internalType: "bool",
+                  name: "forSale",
+                  type: "bool",
+                },
+                {
+                  internalType: "bool",
+                  name: "sold",
+                  type: "bool",
+                },
+              ],
+              internalType: "struct YourContract.Artwork[]",
+              name: "",
+              type: "tuple[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_id",
+              type: "uint256",
+            },
+          ],
+          name: "getArtwork",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "string",
+                  name: "title",
+                  type: "string",
+                },
+                {
+                  internalType: "string",
+                  name: "description",
+                  type: "string",
+                },
+                {
+                  internalType: "string",
+                  name: "author",
+                  type: "string",
+                },
+                {
+                  internalType: "uint256",
+                  name: "price",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "owner",
+                  type: "address",
+                },
+                {
+                  internalType: "bool",
+                  name: "forSale",
+                  type: "bool",
+                },
+                {
+                  internalType: "bool",
+                  name: "sold",
+                  type: "bool",
+                },
+              ],
+              internalType: "struct YourContract.Artwork",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "greeting",
+          outputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_id",
+              type: "uint256",
+            },
+            {
+              internalType: "bool",
+              name: "_forSale",
+              type: "bool",
+            },
+          ],
+          name: "setArtworkForSale",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "title",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "description",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "author",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "price",
+              type: "uint256",
+            },
+          ],
+          name: "uploadArtwork",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "withdraw",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          stateMutability: "payable",
+          type: "receive",
+        },
+      ],
+      inheritedFunctions: {},
+    },
+  },
+} as const;
 
 export default deployedContracts satisfies GenericContractsDeclaration;
