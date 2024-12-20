@@ -1,71 +1,227 @@
 "use client";
-
-import Link from "next/link";
-import type { NextPage } from "next";
+import { useEffect, useState } from 'react';
 import { useAccount } from "wagmi";
-import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { parseEther, formatEther } from "viem";
+import styles from '../styles/Home.module.css';
 import { Address } from "~~/components/scaffold-eth";
+import { useScaffoldReadContract, useDeployedContractInfo, useScaffoldWriteContract } from '~~/hooks/scaffold-eth';
 
-const Home: NextPage = () => {
+
+export default function Home() {
+  const [artworks, setArtworks] = useState([]);
+  const [_userCollection, setUserCollection] = useState([]);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [author, setAuthor] = useState('');
+  const [price, setPrice] = useState('');
   const { address: connectedAddress } = useAccount();
 
-  return (
-    <>
-      <div className="flex items-center flex-col flex-grow pt-10">
-        <div className="px-5">
-          <h1 className="text-center">
-            <span className="block text-2xl mb-2">Welcome to</span>
-            <span className="block text-4xl font-bold">Scaffold-ETH 2</span>
-          </h1>
-          <div className="flex justify-center items-center space-x-2 flex-col sm:flex-row">
-            <p className="my-2 font-medium">Connected Address:</p>
-            <Address address={connectedAddress} />
-          </div>
-          <p className="text-center text-lg">
-            Get started by editing{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/nextjs/app/page.tsx
-            </code>
-          </p>
-          <p className="text-center text-lg">
-            Edit your smart contract{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              YourContract.sol
-            </code>{" "}
-            in{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/hardhat/contracts
-            </code>
-          </p>
-        </div>
+  const { data: deployedContractData } = useDeployedContractInfo("YourContract");
 
-        <div className="flex-grow bg-base-300 w-full mt-16 px-8 py-12">
-          <div className="flex justify-center items-center gap-12 flex-col sm:flex-row">
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <BugAntIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Tinker with your smart contract using the{" "}
-                <Link href="/debug" passHref className="link">
-                  Debug Contracts
-                </Link>{" "}
-                tab.
-              </p>
-            </div>
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <MagnifyingGlassIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Explore your local transactions with the{" "}
-                <Link href="/blockexplorer" passHref className="link">
-                  Block Explorer
-                </Link>{" "}
-                tab.
-              </p>
-            </div>
-          </div>
+  const { data: awailableArtworks } = useScaffoldReadContract({
+    contractName: "YourContract",
+    functionName: "getAllArtworks",
+  });
+
+  const {data: artworksCollection} = useScaffoldReadContract({
+    contractName: "YourContract",
+    functionName: "getUserCollection",
+    args: [connectedAddress]
+  });
+
+  const { writeContractAsync: writeYourContractAsync } = useScaffoldWriteContract("YourContract");
+
+  useEffect(() => {
+    loadArtworks();
+    loadUserColletionArtworks();
+  });
+
+  const loadArtworks = async () => {
+    const artworksArray = await awailableArtworks;
+    setArtworks(artworksArray);
+  };
+
+  const loadUserColletionArtworks = async () => {
+    const collection = artworksCollection;
+    setUserCollection(artworksCollection);
+  }
+
+  const uploadArtwork = async () => {
+    if (!title || !description || !author || !price ) return;
+    try {
+      await writeYourContractAsync({
+        functionName: "uploadArtwork",
+        args: [title, description, author, parseEther(price)],
+      });
+    } catch (e) {
+      console.error("Error uploading artwork:", e);
+    }
+    setTitle('');
+    setDescription('');
+    setAuthor('');
+    setPrice('');
+    loadUserColletionArtworks();
+    loadArtworks();
+  };
+
+  const buyArtwork = async (id: bigint, price: string) => {
+    try {
+      await writeYourContractAsync({
+        functionName: "buyArtwork",
+        args: [id],
+        value: parseEther(price)
+      });
+    } catch (e) {
+      console.error("Error buying artwork:", e);
+    }
+    loadUserColletionArtworks();
+    loadArtworks();
+  };
+
+  const setArtworkForSale = async (id: bigint) => {
+    try {
+      await writeYourContractAsync({
+        functionName: "setArtworkForSale",
+        args: [id]
+      });
+    } catch (e) {
+      console.error("Error setting artwork for sale:", e);
+    }
+    loadUserColletionArtworks();
+    loadArtworks();
+  };
+
+  return (
+    <div className={styles.container}>
+      <div className="px-5">
+        <h1 className="text-center">
+          <span className="block text-2xl mb-2">Welcome to</span>
+          <span className="block text-4xl font-bold">Artwork Marketplace</span>
+        </h1>
+        <div className="flex justify-center items-center space-x-2 flex-col sm:flex-row">
+          <p className="my-2 font-medium">Connected Address:</p>
+          <Address address={connectedAddress} />
+        </div>
+        <div className="flex justify-center items-center space-x-2 flex-col sm:flex-row">
+          <p className="my-2 font-medium">Contract Address:</p>
+          <Address address={deployedContractData?.address} />
         </div>
       </div>
-    </>
+      <br></br>
+      <div className="px-5">
+        <h2 className="text-center">
+          <span className="block text-2xl mb-2">Available Artworks</span>
+        </h2>
+      </div>
+      <table className={styles.table}>
+        <thead>
+            <tr className={styles.tr}>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Author</th>
+                <th>Price</th>
+                <th>Owner</th>
+                <th>For Sale</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody className={styles.tbody}>
+            {artworks && artworks.length > 0 ? (
+                artworks.map((artwork) => (
+                    <tr key={artwork.id.toString()} className={styles.tr}>
+                        <td className={styles.td}>{artwork.title}</td>
+                        <td className={styles.td}>{artwork.description}</td>
+                        <td className={styles.td}>{artwork.author}</td>
+                        <td className={styles.td}>{formatEther(artwork.price)} ETH</td>
+                        <td className={styles.td}>{artwork.owner}</td>
+                        <td className={styles.td}>{artwork.forSale.toString()}</td>
+                        <td className={styles.td}>
+                            <button className={styles.button} onClick={() => buyArtwork(artwork.id, formatEther(artwork.price))}>
+                                Buy
+                            </button>
+                        </td>
+                    </tr>
+                ))
+            ) : (
+                <tr>
+                    <td colSpan={6} className="text-center">No artworks uploaded yet</td>
+                </tr>
+            )}
+        </tbody>
+      </table>
+      <br></br>
+      <div className="px-5">
+        <h2 className="text-center">
+          <span className="block text-2xl mb-2">Upload Artwork</span>
+        </h2>
+      </div>
+      <hr></hr>
+      <input className={styles.input}
+        type="text"
+        placeholder="Artwork Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
+      <input className={styles.input}
+        type="text"
+        placeholder="Artwork Description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
+      <input className={styles.input}
+        type="text"
+        placeholder="Artwork Author"
+        value={author}
+        onChange={(e) => setAuthor(e.target.value)}
+      />
+      <input className={styles.input}
+        type="text"
+        placeholder="Price in ETH"
+        value={price}
+        onChange={(e) => setPrice(e.target.value)}
+      />
+      <button className={styles.button} onClick={uploadArtwork}>Upload Artwork</button>
+      <hr></hr>
+      <br></br>
+      <div className="px-5">
+        <h2 className="text-center">
+          <span className="block text-2xl mb-2">Your Collection</span>
+        </h2>
+      </div>
+      <table className={styles.table}>
+        <thead>
+          <tr className={styles.tr}>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Author</th>
+            <th>Price</th>
+            <th>For Sale</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody className={styles.tbody}>
+          {_userCollection && _userCollection.length > 0 ? (
+            _userCollection.map((artwork) => (
+              <tr key={artwork.id.toString()} className={styles.tr}>
+                <td className={styles.td}>{artwork.title}</td>
+                <td className={styles.td}>{artwork.description}</td>
+                <td className={styles.td}>{artwork.author}</td>
+                <td className={styles.td}>{formatEther(artwork.price)} ETH</td>
+                <td className={styles.td}>{artwork.forSale.toString()}</td>
+                <td className={styles.td}>
+                    <button className={styles.button} onClick={() => setArtworkForSale(artwork.id)}>
+                        Set For Sale
+                    </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+              <tr>
+                  <td colSpan={6} className="text-center">No artworks in your collection yet</td>
+              </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
   );
-};
-
-export default Home;
+}

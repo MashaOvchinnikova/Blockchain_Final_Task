@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     YourContract: {
-      address: "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+      address: "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
       abi: [
         {
           inputs: [
@@ -19,6 +19,75 @@ const deployedContracts = {
           ],
           stateMutability: "nonpayable",
           type: "constructor",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "id",
+                  type: "uint256",
+                },
+                {
+                  internalType: "string",
+                  name: "title",
+                  type: "string",
+                },
+                {
+                  internalType: "string",
+                  name: "description",
+                  type: "string",
+                },
+                {
+                  internalType: "string",
+                  name: "author",
+                  type: "string",
+                },
+                {
+                  internalType: "uint256",
+                  name: "price",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "owner",
+                  type: "address",
+                },
+                {
+                  internalType: "bool",
+                  name: "forSale",
+                  type: "bool",
+                },
+              ],
+              indexed: false,
+              internalType: "struct YourContract.Artwork",
+              name: "artwork",
+              type: "tuple",
+            },
+          ],
+          name: "ArtworkAddedToCollection",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "id",
+              type: "uint256",
+            },
+          ],
+          name: "ArtworkSetUpForSale",
+          type: "event",
         },
         {
           anonymous: false,
@@ -42,6 +111,12 @@ const deployedContracts = {
         {
           anonymous: false,
           inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "id",
+              type: "uint256",
+            },
             {
               indexed: false,
               internalType: "string",
@@ -100,6 +175,11 @@ const deployedContracts = {
           name: "artworks",
           outputs: [
             {
+              internalType: "uint256",
+              name: "id",
+              type: "uint256",
+            },
+            {
               internalType: "string",
               name: "title",
               type: "string",
@@ -127,11 +207,6 @@ const deployedContracts = {
             {
               internalType: "bool",
               name: "forSale",
-              type: "bool",
-            },
-            {
-              internalType: "bool",
-              name: "sold",
               type: "bool",
             },
           ],
@@ -171,6 +246,11 @@ const deployedContracts = {
             {
               components: [
                 {
+                  internalType: "uint256",
+                  name: "id",
+                  type: "uint256",
+                },
+                {
                   internalType: "string",
                   name: "title",
                   type: "string",
@@ -198,11 +278,6 @@ const deployedContracts = {
                 {
                   internalType: "bool",
                   name: "forSale",
-                  type: "bool",
-                },
-                {
-                  internalType: "bool",
-                  name: "sold",
                   type: "bool",
                 },
               ],
@@ -227,6 +302,11 @@ const deployedContracts = {
             {
               components: [
                 {
+                  internalType: "uint256",
+                  name: "id",
+                  type: "uint256",
+                },
+                {
                   internalType: "string",
                   name: "title",
                   type: "string",
@@ -256,11 +336,6 @@ const deployedContracts = {
                   name: "forSale",
                   type: "bool",
                 },
-                {
-                  internalType: "bool",
-                  name: "sold",
-                  type: "bool",
-                },
               ],
               internalType: "struct YourContract.Artwork",
               name: "",
@@ -271,13 +346,56 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [],
-          name: "greeting",
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+          ],
+          name: "getUserCollection",
           outputs: [
             {
-              internalType: "string",
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "id",
+                  type: "uint256",
+                },
+                {
+                  internalType: "string",
+                  name: "title",
+                  type: "string",
+                },
+                {
+                  internalType: "string",
+                  name: "description",
+                  type: "string",
+                },
+                {
+                  internalType: "string",
+                  name: "author",
+                  type: "string",
+                },
+                {
+                  internalType: "uint256",
+                  name: "price",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "owner",
+                  type: "address",
+                },
+                {
+                  internalType: "bool",
+                  name: "forSale",
+                  type: "bool",
+                },
+              ],
+              internalType: "struct YourContract.Artwork[]",
               name: "",
-              type: "string",
+              type: "tuple[]",
             },
           ],
           stateMutability: "view",
@@ -287,13 +405,8 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "uint256",
-              name: "_id",
+              name: "id",
               type: "uint256",
-            },
-            {
-              internalType: "bool",
-              name: "_forSale",
-              type: "bool",
             },
           ],
           name: "setArtworkForSale",
@@ -330,15 +443,65 @@ const deployedContracts = {
           type: "function",
         },
         {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "userCollection",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "id",
+              type: "uint256",
+            },
+            {
+              internalType: "string",
+              name: "title",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "description",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "author",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "price",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+            {
+              internalType: "bool",
+              name: "forSale",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
           inputs: [],
           name: "withdraw",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
-        },
-        {
-          stateMutability: "payable",
-          type: "receive",
         },
       ],
       inheritedFunctions: {},
